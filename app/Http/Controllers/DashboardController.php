@@ -32,7 +32,9 @@ class DashboardController extends Controller
             DB::raw("DATE_FORMAT(created_at, '%d %M') as days")
         )
         ->where('created_at', '>=', Carbon::now()->subDays(7))
-        ->groupBy('days')->orderBy('created_at', 'asc')->get();
+        ->groupBy('days')
+        ->orderByRaw('MIN(created_at) ASC')
+        ->get();
 
         return view('admin.dashboard', compact('logs', 'riwayat'));
     }
@@ -100,7 +102,7 @@ class DashboardController extends Controller
             }
 
             $data['password'] = Hash::make($request->new_password);
-        } 
+        }
 
         // for update avatar
         if($request->avatar) {
@@ -110,10 +112,10 @@ class DashboardController extends Controller
                 unlink(storage_path('app/public/'.auth()->user()->avatar));
             }
         }
-        
+
         // update profile
         auth()->user()->update($data);
-        
+
         return redirect()->back()->with('success', 'Profile updated!');
     }
 
@@ -139,6 +141,6 @@ class DashboardController extends Controller
         }
 
         return '';
-        
+
     }
 }
